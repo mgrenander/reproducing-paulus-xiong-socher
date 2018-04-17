@@ -16,7 +16,7 @@ def convert_to_tsv(dataset):
         article = open(os.path.join(art_path, article_name), encoding='utf-8')
         reference = open(os.path.join(ref_path, ref_name), encoding='utf-8')
 
-        row = pd.Series(index=['article', 'reference'], data=[article.read(), reference.read()], dtype=str)
+        row = {'article': article.read(), 'reference': reference.read()}
         df.append(row, ignore_index=True)
 
     print(df)
@@ -27,7 +27,7 @@ def convert_to_tsv(dataset):
 if __name__ == "__main__":
     datasets = ["test"]
     for dataset in datasets:
-        if not os.path.exists(dataset + ".tsv"):
+        if not os.path.exists(os.path.join("data", dataset + ".tsv")):
             print("Creating TSV for " + dataset)
             convert_to_tsv(dataset)
 
