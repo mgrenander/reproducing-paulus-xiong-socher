@@ -3,9 +3,10 @@ import pandas as pd
 import sys
 import os
 
+base_path = "data/finished_files"
 def convert_to_tsv(dataset):
-    art_path = os.path.join("article", dataset)
-    ref_path = os.path.join("reference", dataset)
+    art_path = os.path.join(base_path, "article", dataset)
+    ref_path = os.path.join(base_path, "reference", dataset)
 
     df = pd.DataFrame(columns=['article', 'reference'], dtype=str)
     for i in range(len(os.listdir(art_path))):
