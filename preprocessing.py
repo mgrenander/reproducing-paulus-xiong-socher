@@ -25,7 +25,7 @@ def convert_to_tsv(dataset):
               header=False, index=False, chunksize=1000)
 
 if __name__ == "__main__":
-    datasets = ["test"]
+    datasets = ["train", "val", "test"]
     for dataset in datasets:
         if not os.path.exists(os.path.join("data", dataset + ".tsv")):
             print("Creating TSV for " + dataset)
