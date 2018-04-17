@@ -16,9 +16,9 @@ def convert_to_tsv(dataset):
         reference = open(os.path.join(ref_path, ref_name), encoding='utf-8')
 
         row = pd.Series(index=['article', 'reference'], data=[article.read(), reference.read()], dtype=str)
+        df.append(row)
 
-        print(row)
-        break
+    df.to_csv(path_or_buf=dataset + ".tsv", sep='\t', columns=['article', 'reference'], header=False, index=False, chunksize=1000)
 
 dataset = sys.argv[1]
 convert_to_tsv(dataset)
