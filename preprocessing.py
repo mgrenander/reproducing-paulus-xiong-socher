@@ -4,25 +4,24 @@ import sys
 import os
 from tqdm import tqdm
 
-base_path = "data/finished_files"
+base_path = "data"
+base_read_path = "data/finished_files"
 def convert_to_tsv(dataset):
-    art_path = os.path.join(base_path, "article", dataset)
-    ref_path = os.path.join(base_path, "reference", dataset)
+    art_path = os.path.join(base_read_path, "article", dataset)
+    ref_path = os.path.join(base_read_path, "reference", dataset)
 
-    df = pd.DataFrame(columns=['article', 'reference'], dtype=str)
+    # Remove previous version
+    open(os.path.join(base_path, dataset + ".tsv"), 'w').close()
+
+    f = open(os.path.join(base_path, dataset + ".tsv"), 'a', encoding='utf-8')
     for i in tqdm(range(len(os.listdir(art_path)))):
         article_name = str(i) + "_" + dataset + "_art.txt"
         ref_name = str(i) + "_" + dataset + "_ref.txt"
         article = open(os.path.join(art_path, article_name), encoding='utf-8')
         reference = open(os.path.join(ref_path, ref_name), encoding='utf-8')
 
-        row = {'article': article.read(), 'reference': reference.read()}
-        df = df.append(row, ignore_index=True)
-
-    print(df)
-
-    df.to_csv(path_or_buf=os.path.join("data", dataset + ".tsv"), sep='\t', columns=['article', 'reference'],
-              header=False, index=False, chunksize=1000)
+        f.write(article.read() + "\t" + reference.read())
+    f.close()
 
 if __name__ == "__main__":
     datasets = ["train", "val", "test"]
