@@ -17,7 +17,7 @@ def convert_to_tsv(dataset):
         reference = open(os.path.join(ref_path, ref_name), encoding='utf-8')
 
         row = {'article': article.read(), 'reference': reference.read()}
-        df.append(row, ignore_index=True)
+        df = df.append(row, ignore_index=True)
 
     print(df)
 
