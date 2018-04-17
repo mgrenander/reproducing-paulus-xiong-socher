@@ -18,7 +18,8 @@ def convert_to_tsv(dataset):
         row = pd.Series(index=['article', 'reference'], data=[article.read(), reference.read()], dtype=str)
         df.append(row)
 
-    df.to_csv(path_or_buf=dataset + ".tsv", sep='\t', columns=['article', 'reference'], header=False, index=False, chunksize=1000)
+    df.to_csv(path_or_buf=os.path.join("data", dataset + ".tsv"), sep='\t', columns=['article', 'reference'],
+              header=False, index=False, chunksize=1000)
 
 dataset = sys.argv[1]
 convert_to_tsv(dataset)
