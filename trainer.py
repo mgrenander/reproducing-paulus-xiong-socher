@@ -11,6 +11,7 @@ for dataset in datasets:
         print("Creating TSV for " + dataset)
         convert_to_tsv(dataset)
 
+print("Creating datasets")
 ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
 SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
 train, val, test = data.TabularDataset.splits(path='./data/', train='train.tsv', validation='val.tsv', test='test.tsv',
