@@ -42,7 +42,7 @@ print("Creating datasets")
 # TODO: remove this when ready for training
 ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
 SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
-train, test = data.TabularDataset.splits(path='./data/', train='valid.tsv', test='test.tsv', format='tsv',
+train, test = data.TabularDataset.splits(path='./data/', train='val.tsv', test='test.tsv', format='tsv',
                                          fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
 ARTICLE.build_vocab(train, vectors="glove.6B.100d", max_size=encoder_vocab_size)
 SUMMARY.build_vocab(train, max_size=decoder_vocab_size)

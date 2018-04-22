@@ -59,5 +59,4 @@ class DecoderLSTM(Module):
         embeds = self.embedding(batch.text)
         out, hidden = self.lstm(embeds, prev_hidden)
         output = self.linear(out[-1])
-        output = F.softmax(output, dim=1)
         return output, hidden
