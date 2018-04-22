@@ -59,8 +59,7 @@ diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 
 print("Creating batches", end='', flush=True)
-train_iter, test_iter = data.BucketIterator.splits(
-    (train, test), sort_key=lambda x: len(x.Text), batch_size=50, repeat=False, device=DEVICE)
+train_iter, test_iter = data.BucketIterator.splits((train, test), batch_size=50, repeat=False, device=DEVICE)
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 ###############################
@@ -100,6 +99,8 @@ def train(batch, enc, dec, enc_opt, dec_opt, loss_f, teacher_forcing_ratio):
     input_length = batch.text.size()[0]
     target_length = batch.label.size()[0]
 
+    for w_i in range(input_length):
+        enc_output, enc_hidden = encoder(batch.text)
 
 
 

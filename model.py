@@ -30,8 +30,6 @@ class EncoderLSTM(Module):
         out, hidden = self.lstm(embeds, self.hidden)
         return out, hidden
 
-        # if not self.training:  # Set repeated trigram to false
-
 
 class DecoderLSTM(Module):
     def __init__(self, input_size, embed_size, hidden_size, output_size, use_gpu=False, gpu_device=0, batch_size=50):
@@ -60,3 +58,5 @@ class DecoderLSTM(Module):
         out, hidden = self.lstm(embeds, prev_hidden)
         output = self.linear(out[-1])
         return output, hidden
+
+        # if not self.training:  # Set repeated trigram to false

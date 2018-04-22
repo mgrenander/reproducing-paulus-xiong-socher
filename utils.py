@@ -36,4 +36,4 @@ def tokenizer_out(text):
     return [tok.text for tok in spacy_en(text)[:max_output_len]]
 
 def get_time_diff(curr_time):
-    return datetime.now(), (datetime.now() - curr_time).seconds / 60.0
+    return (datetime.now() - curr_time).seconds / 60.0, datetime.now()
