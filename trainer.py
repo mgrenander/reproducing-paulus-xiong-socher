@@ -32,34 +32,22 @@ for dataset in datasets:
 
 print("Creating datasets", end='', flush=True)
 curr_time = datetime.now()
-# article_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
-# summary_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
-# train, val, test = data.TabularDataset.splits(path='./data/', train='train.tsv', validation='val.tsv', test='test.tsv',
-#                                               format='tsv', fields=[('Article', article_field), ('Summary', summary_field)])
-# article_field.build_vocab(train, vectors="glove.6B.100d", max_size=encoder_vocab_size)
-# summary_field.build_vocab(train, max_size=decoder_vocab_size)
-#
-# train_iter, val_iter, test_iter = data.BucketIterator.splits(
-#     (train, val, test), sort_key=lambda x: len(x.article), batch_size=50, repeat=False, device=DEVICE)
 
-# TODO: remove this when ready for training
+# TODO: change val to train and test to val when ready
 article_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
 summary_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
-train_set, test_set = data.TabularDataset.splits(path='./data/', train='val.tsv', test='test.tsv', format='tsv',
-                                         fields=[('article', article_field), ('summary', summary_field)])
+train_set, val_set = data.TabularDataset.splits(path='./data/', train='val.tsv', validation='test.tsv', format='tsv',
+                                                fields=[('article', article_field), ('summary', summary_field)])
 
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 
-print("Building vocabulary", end='', flush=True)
+print("Building vocabulary and creating batches", end='', flush=True)
 article_field.build_vocab(train_set, vectors="glove.6B.100d", max_size=encoder_vocab_size)
 summary_field.build_vocab(train_set, max_size=decoder_vocab_size)
 
-diff_time, curr_time = get_time_diff(curr_time)
-print(", took {} min".format(diff_time))
-
-print("Creating batches", end='', flush=True)
-train_iter, test_iter = data.BucketIterator.splits((train_set, test_set), batch_size=batch_size, repeat=False, device=DEVICE)
+train_iter, val_iter = data.BucketIterator.splits((train_set, val_set), batch_size=batch_size, repeat=False,
+                                                  sort_key=lambda x: len(x.article), device=DEVICE)
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 ###############################
