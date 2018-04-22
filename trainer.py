@@ -32,34 +32,34 @@ for dataset in datasets:
 
 print("Creating datasets", end='', flush=True)
 curr_time = datetime.now()
-# ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
-# SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
+# article_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
+# summary_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
 # train, val, test = data.TabularDataset.splits(path='./data/', train='train.tsv', validation='val.tsv', test='test.tsv',
-#                                               format='tsv', fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
-# ARTICLE.build_vocab(train, vectors="glove.6B.100d", max_size=encoder_vocab_size)
-# SUMMARY.build_vocab(train, max_size=decoder_vocab_size)
+#                                               format='tsv', fields=[('Article', article_field), ('Summary', summary_field)])
+# article_field.build_vocab(train, vectors="glove.6B.100d", max_size=encoder_vocab_size)
+# summary_field.build_vocab(train, max_size=decoder_vocab_size)
 #
 # train_iter, val_iter, test_iter = data.BucketIterator.splits(
 #     (train, val, test), sort_key=lambda x: len(x.Text), batch_size=50, repeat=False, device=DEVICE)
 
 # TODO: remove this when ready for training
-ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
-SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
-train, test = data.TabularDataset.splits(path='./data/', train='val.tsv', test='test.tsv', format='tsv',
-                                         fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
+article_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
+summary_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
+train_set, test_set = data.TabularDataset.splits(path='./data/', train='val.tsv', test='test.tsv', format='tsv',
+                                         fields=[('article', article_field), ('summary', summary_field)])
 
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 
 print("Building vocabulary", end='', flush=True)
-ARTICLE.build_vocab(train, vectors="glove.6B.100d", max_size=encoder_vocab_size)
-SUMMARY.build_vocab(train, max_size=decoder_vocab_size)
+article_field.build_vocab(train_set, vectors="glove.6B.100d", max_size=encoder_vocab_size)
+summary_field.build_vocab(train_set, max_size=decoder_vocab_size)
 
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 
 print("Creating batches", end='', flush=True)
-train_iter, test_iter = data.BucketIterator.splits((train, test), batch_size=50, repeat=False, device=DEVICE)
+train_iter, test_iter = data.BucketIterator.splits((train_set, test_set), batch_size=batch_size, repeat=False, device=DEVICE)
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 ###############################
@@ -68,12 +68,12 @@ print(", took {} min".format(diff_time))
 print("Creating encoder and decoder models", end='', flush=True)
 encoder = EncoderLSTM(input_size=encoder_vocab_size, embed_size=embed_size, hidden_size=encoder_hidden_size,
                       use_gpu=True, gpu_device=DEVICE, batch_size=batch_size)
-encoder.embedding.weight.data = ARTICLE.vocab.vectors
+encoder.embedding.weight.data = article_field.vocab.vectors
 encoder.cuda(device=DEVICE)
 
 decoder = DecoderLSTM(input_size=encoder_vocab_size, embed_size=embed_size, hidden_size=decoder_hidden_size,
                       output_size=decoder_vocab_size, use_gpu=True, gpu_device=DEVICE, batch_size=batch_size)
-decoder.embedding.weight.data = ARTICLE.vocab.vectors
+decoder.embedding.weight.data = article_field.vocab.vectors
 decoder.cuda(device=DEVICE)
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
@@ -96,11 +96,12 @@ def train(batch, enc, dec, enc_opt, dec_opt, loss_f, teacher_forcing_ratio):
     encoder.init_hidden()
 
     # TODO: not sure about this
-    input_length = batch.text.size()[0]
-    target_length = batch.label.size()[0]
+    input_length = batch.article.size()[0]
+    target_length = batch.summary.size()[0]
 
     for w_i in range(input_length):
-        enc_output, enc_hidden = encoder(batch.text)
+        enc_output, enc_hidden = encoder(batch.article)
+
 
 
 
