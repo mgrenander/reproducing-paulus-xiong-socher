@@ -5,6 +5,7 @@ from utils import *
 import sys
 from model import *
 from tqdm import tqdm
+from datetime import datetime
 
 # Constants
 DEVICE = int(sys.argv[1])
@@ -28,7 +29,8 @@ for dataset in datasets:
         print("Creating TSV for " + dataset)
         convert_to_tsv(dataset)
 
-print("Creating datasets")
+print("Creating datasets", end='')
+curr_time = datetime.now()
 # ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
 # SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
 # train, val, test = data.TabularDataset.splits(path='./data/', train='train.tsv', validation='val.tsv', test='test.tsv',
@@ -44,14 +46,18 @@ ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tok
 SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
 train, test = data.TabularDataset.splits(path='./data/', train='val.tsv', test='test.tsv', format='tsv',
                                          fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
-print("Building vocabulary")
+diff_time, curr_time = get_time_diff(curr_time)
+print(", took {} min".format(diff_time))
+print("Building vocabulary", end='')
 ARTICLE.build_vocab(train, vectors="glove.6B.100d", max_size=encoder_vocab_size)
 SUMMARY.build_vocab(train, max_size=decoder_vocab_size)
-
-print("Creating batches")
+diff_time, curr_time = get_time_diff(curr_time)
+print(", took {} min".format(diff_time))
+print("Creating batches", end='')
 train_iter, test_iter = data.BucketIterator.splits(
     (train, test), sort_key=lambda x: len(x.Text), batch_size=50, repeat=False, device=DEVICE)
-
+diff_time, curr_time = get_time_diff(curr_time)
+print(", took {} min".format(diff_time))
 ###############################
 # MODEL CREATION
 ###############################
@@ -65,7 +71,8 @@ decoder = DecoderLSTM(input_size=encoder_vocab_size, embed_size=embed_size, hidd
                       output_size=decoder_vocab_size, use_gpu=True, gpu_device=DEVICE, batch_size=batch_size)
 decoder.embedding.weight.data = ARTICLE.vocab.vectors
 decoder.cuda(device=DEVICE)
-
+diff_time, curr_time = get_time_diff(curr_time)
+print(", took {} min".format(diff_time))
 # TODO: Load previously checkpointed encoder and decoder if they exists
 
 # Loss and SGD optimizers
@@ -93,5 +100,6 @@ for epoch in tqdm_epoch:
     tqdm_batch = tqdm(train_iter, desc="Batch")
     for b_id, batch in enumerate(tqdm_batch):
         train(batch, encoder, decoder, encoder_opt, decoder_opt, loss_func, teacher_forcing_ratio)
-
+diff_time, curr_time = get_time_diff(curr_time)
+print(", took {} min".format(diff_time))
 print("Evaluating model")
