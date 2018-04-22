@@ -44,9 +44,11 @@ ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tok
 SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
 train, test = data.TabularDataset.splits(path='./data/', train='val.tsv', test='test.tsv', format='tsv',
                                          fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
+print("Building vocabulary")
 ARTICLE.build_vocab(train, vectors="glove.6B.100d", max_size=encoder_vocab_size)
 SUMMARY.build_vocab(train, max_size=decoder_vocab_size)
 
+print("Creating batches")
 train_iter, test_iter = data.BucketIterator.splits(
     (train, test), sort_key=lambda x: len(x.Text), batch_size=50, repeat=False, device=DEVICE)
 
