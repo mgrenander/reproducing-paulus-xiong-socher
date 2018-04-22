@@ -1,8 +1,9 @@
 import torch
 from torchtext import data
 from utils import *
+import sys
 
-DEVICE = 0
+DEVICE = int(sys.argv[1])
 
 # PREPROCESSING
 datasets = ["train", "val", "test"]
@@ -12,14 +13,20 @@ for dataset in datasets:
         convert_to_tsv(dataset)
 
 print("Creating datasets")
+# ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
+# SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
+# train, val, test = data.TabularDataset.splits(path='./data/', train='train.tsv', validation='val.tsv', test='test.tsv',
+#                                               format='tsv', fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
+# ARTICLE.build_vocab(train, vectors="glove.6B.100d", max_size=150000)
+# SUMMARY.build_vocab(train, max_size=50000)
+#
+# train_iter, val_iter, test_iter = data.BucketIterator.splits(
+#     (train, val, test), sort_key=lambda x: len(x.Text), batch_size=50, repeat=False, device=DEVICE)
+
+
 ARTICLE = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
 SUMMARY = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
-train, val, test = data.TabularDataset.splits(path='./data/', train='train.tsv', validation='val.tsv', test='test.tsv',
-                                              format='tsv', fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
-ARTICLE.build_vocab(train, vectors="glove.6B.100d")
-SUMMARY.build_vocab(train)
-
-train_iter, val_iter, test_iter = data.BucketIterator.splits(
-    (train, val, test), sort_key=lambda x: len(x.Text), batch_size=50, repeat=False, device=DEVICE)
+train, test = data.TabularDataset.splits(path='./data/', train='valid.tsv', test='test.tsv', format='tsv',
+                                         fields=[('Article', ARTICLE), ('Summary', SUMMARY)])
 
 # Need to build model and set initial embeddings to ARTICLE.vocab.vectors
