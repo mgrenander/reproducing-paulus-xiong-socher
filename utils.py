@@ -1,6 +1,7 @@
 import os
 from tqdm import tqdm
 import spacy
+from datetime import datetime
 
 spacy_en = spacy.load('en')
 base_path = "data"
@@ -29,6 +30,10 @@ def tokenizer_in(text):
     """Tokenizer. Note we limit to top 800 tokens, as per Paulus et al."""
     return [tok.text for tok in spacy_en(text)[:max_input_len]]
 
+
 def tokenizer_out(text):
     """Tokenizer. Note we limit to top 100 tokens"""
     return [tok.text for tok in spacy_en(text)[:max_output_len]]
+
+def get_time_diff(curr_time):
+    return datetime.now(), (datetime.now() - curr_time).seconds / 60.0
