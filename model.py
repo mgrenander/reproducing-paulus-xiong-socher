@@ -25,8 +25,8 @@ class EncoderLSTM(Module):
             self.hidden = (Variable(torch.zeros(1, self.batch_size, self.hidden_size)),
                             Variable(torch.zeros(1, self.batch_size, self.hidden_size)))
 
-    def forward(self, batch):
-        embeds = self.embedding(batch.text)
+    def forward(self, art_batch):
+        embeds = self.embedding(art_batch)
         out, hidden = self.lstm(embeds, self.hidden)
         return out, hidden
 
@@ -53,8 +53,8 @@ class DecoderLSTM(Module):
             self.hidden = (Variable(torch.zeros(1, self.batch_size, self.hidden_size)),
                             Variable(torch.zeros(1, self.batch_size, self.hidden_size)))
 
-    def forward(self, batch, prev_hidden):
-        embeds = self.embedding(batch.text)
+    def forward(self, art_batch, prev_hidden):
+        embeds = self.embedding(art_batch)
         out, hidden = self.lstm(embeds, prev_hidden)
         output = self.linear(out[-1])
         return output, hidden

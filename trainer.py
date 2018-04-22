@@ -40,7 +40,7 @@ curr_time = datetime.now()
 # summary_field.build_vocab(train, max_size=decoder_vocab_size)
 #
 # train_iter, val_iter, test_iter = data.BucketIterator.splits(
-#     (train, val, test), sort_key=lambda x: len(x.Text), batch_size=50, repeat=False, device=DEVICE)
+#     (train, val, test), sort_key=lambda x: len(x.article), batch_size=50, repeat=False, device=DEVICE)
 
 # TODO: remove this when ready for training
 article_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
