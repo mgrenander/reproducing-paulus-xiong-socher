@@ -36,8 +36,11 @@ curr_time = datetime.now()
 # TODO: change val to train and test to val when ready
 article_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
 summary_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
-train_set, val_set = data.TabularDataset.splits(path='./data/', train='val.tsv', validation='test.tsv', format='tsv',
-                                                fields=[('article', article_field), ('summary', summary_field)])
+# train_set, val_set = data.TabularDataset.splits(path='./data/', train='val.tsv', validation='test.tsv', format='tsv',
+#                                                 fields=[('article', article_field), ('summary', summary_field)])
+
+train_set = data.TabularDataset(path='./data/val.tsv', format='tsv', fields=[('article', article_field), ('summary', summary_field)])
+val_set = data.TabularDataset(path='./data/test.tsv', format='tsv', fields=[('article', article_field), ('summary', summary_field)])
 
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))

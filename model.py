@@ -19,11 +19,11 @@ class EncoderLSTM(Module):
     def init_hidden(self):
         # Tuple for initialization of LSTM: (hidden state, cell state)
         if self.use_gpu:
-            self.hidden = (Variable(torch.zeros(1, self.batch_size, self.hidden_size).cuda(device=self.gpu_device)),
-                            Variable(torch.zeros(1, self.batch_size, self.hidden_size).cuda(device=self.gpu_device)))
+            self.hidden = (Variable(torch.zeros(2, self.batch_size, self.hidden_size).cuda(device=self.gpu_device)),
+                            Variable(torch.zeros(2, self.batch_size, self.hidden_size).cuda(device=self.gpu_device)))
         else:
-            self.hidden = (Variable(torch.zeros(1, self.batch_size, self.hidden_size)),
-                            Variable(torch.zeros(1, self.batch_size, self.hidden_size)))
+            self.hidden = (Variable(torch.zeros(2, self.batch_size, self.hidden_size)),
+                            Variable(torch.zeros(2, self.batch_size, self.hidden_size)))
 
     def forward(self, art_batch):
         embeds = self.embedding(art_batch)
