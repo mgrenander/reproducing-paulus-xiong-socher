@@ -22,7 +22,7 @@ def convert_to_tsv(dataset):
         article = open(os.path.join(art_path, article_name), encoding='utf-8')
         reference = open(os.path.join(ref_path, ref_name), encoding='utf-8')
 
-        f.write(article.read() + "\t" + reference.read())
+        f.write(article.read() + "\t" + reference.read() + "\n")
     f.close()
 
 

@@ -36,11 +36,11 @@ curr_time = datetime.now()
 # TODO: change val to train and test to val when ready
 article_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_in, unk_token=None)
 summary_field = data.Field(tensor_type=torch.cuda.LongTensor, lower=True, tokenize=tokenizer_out, unk_token=None)
-# train_set, val_set = data.TabularDataset.splits(path='./data/', train='val.tsv', validation='test.tsv', format='tsv',
-#                                                 fields=[('article', article_field), ('summary', summary_field)])
+train_set, val_set = data.TabularDataset.splits(path='./data/', train='val.tsv', validation='test.tsv', format='tsv',
+                                                fields=[('article', article_field), ('summary', summary_field)])
 
-train_set = data.TabularDataset(path='./data/val.tsv', format='tsv', fields=[('article', article_field), ('summary', summary_field)])
-val_set = data.TabularDataset(path='./data/test.tsv', format='tsv', fields=[('article', article_field), ('summary', summary_field)])
+# train_set = data.TabularDataset(path='./data/val.tsv', format='tsv', fields=[('article', article_field), ('summary', summary_field)])
+# val_set = data.TabularDataset(path='./data/test.tsv', format='tsv', fields=[('article', article_field), ('summary', summary_field)])
 
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
@@ -51,6 +51,9 @@ summary_field.build_vocab(train_set, max_size=decoder_vocab_size)
 
 train_iter, val_iter = data.BucketIterator.splits((train_set, val_set), batch_size=batch_size, repeat=False,
                                                   sort_key=lambda x: len(x.article), device=DEVICE)
+# train_iter = data.BucketIterator(dataset=train_set, batch_size=50, sort_key=lambda x: len(x.article), repeat=False, device=DEVICE)
+# val_iter = data.BucketIterator(dataset=val_set, batch_size=50, sort_key=lambda x: len(x.article), repeat=False, device=DEVICE)
+
 diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 ###############################
@@ -74,6 +77,7 @@ print(", took {} min".format(diff_time))
 loss_func = nn.CrossEntropyLoss()
 encoder_opt = optim.Adam(encoder.parameters(), lr=lr)
 decoder_opt = optim.Adam(decoder.parameters(), lr=lr)
+
 
 ###############################
 # TRAINING
