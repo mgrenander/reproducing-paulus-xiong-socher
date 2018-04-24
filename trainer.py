@@ -95,7 +95,7 @@ def decode_outputs(decoder, prev_hidden, batch_summ, loss_fn, teacher_forcing_ra
     target_length = batch_summ.size(0)
     curr_tok = batch_summ[0]
     decoder.init_hidden(prev_hidden)
-    loss = 0
+    loss, decoder_out, hidden = 0, None, None
     for w in range(1, target_length):  # Iteration skips the SOS token at w=0
         decoder_out, hidden = decoder(curr_tok)
         loss += loss_fn(decoder_out, batch_summ[w])
@@ -107,7 +107,7 @@ def decode_outputs(decoder, prev_hidden, batch_summ, loss_fn, teacher_forcing_ra
             curr_tok = batch_summ[w]
         else:
             curr_tok = batch_summ[w]
-    return None, None, None
+    return decoder_out, hidden, loss
 
 
 def train(batch, encoder, decoder, enc_opt, dec_opt, loss_fn, teacher_forcing_ratio):

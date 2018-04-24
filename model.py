@@ -54,6 +54,6 @@ class DecoderLSTM(Module):
         embeds = self.embedding(batch_summ).unsqueeze(0)
         out, self.hidden = self.lstm(embeds, self.hidden)
         output = F.log_softmax(self.linear(out.squeeze(0)), dim=1)
-        return output
+        return output, self.hidden
 
         # if not self.training:  # Set repeated trigram to false
