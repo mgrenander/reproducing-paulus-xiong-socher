@@ -116,7 +116,7 @@ def train(batch, encoder, decoder, enc_opt, dec_opt, loss_fn, teacher_forcing_ra
     decoder.train()
     enc_opt.zero_grad()
     dec_opt.zero_grad()
-    enc_output, enc_hidden = encoder(batch.article)  # Run article through encoder
+    enc_output, enc_hidden = encode_inputs(encoder, batch.article)  # Run article through encoder
 
     # Reshape because we are going from bidirectional to unidirectional LSTM
     enc_hidden = (enc_hidden[0].view(1, batch_size, 400), enc_hidden[1].view(1, batch_size, 400))
