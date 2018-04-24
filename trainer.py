@@ -45,8 +45,8 @@ diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 
 print("Building vocabulary and creating batches", end='', flush=True)
-article_field.build_vocab(train_set, vectors="glove.6B.100d", max_size=encoder_vocab_size, specials=["<pad>"])
-summary_field.build_vocab(train_set, max_size=decoder_vocab_size, specials=["<sos>", "<pad>"])
+article_field.build_vocab(train_set, vectors="glove.6B.100d", max_size=encoder_vocab_size)
+summary_field.build_vocab(train_set, max_size=decoder_vocab_size)
 
 # train_iter, val_iter = data.BucketIterator.splits((train_set, val_set), batch_size=batch_size, repeat=False,
 #                                                   sort_key=lambda x: len(x.article), device=DEVICE)
@@ -73,7 +73,7 @@ print(", took {} min".format(diff_time))
 # TODO: Load previously checkpointed encoder and decoder if they exists
 
 # Loss and SGD optimizers
-loss_func = nn.NLLLoss()
+loss_func = nn.NLLLoss(ignore_index=1)  # Ignore <pad> token
 encoder_opt = optim.Adam(encoder.parameters(), lr=lr)
 decoder_opt = optim.Adam(decoder.parameters(), lr=lr)
 
@@ -99,12 +99,10 @@ def decode_outputs(decoder, prev_hidden, batch_summ, loss_fn, teacher_forcing_ra
     for w in range(1, target_length):  # Iteration skips the SOS token at w=0
         decoder_out, hidden = decoder(curr_tok)
         loss += loss_fn(decoder_out, batch_summ[w])
-
         # If not teacher forcing, we take decoder's generated token as next token instead of ground truth
         if random() < teacher_forcing_ratio:
-            # TODO: use top k on decoder_out to find argmax token I think
-            top_val, top_ind = decoder_out.data.topk(1)
-            curr_tok = batch_summ[w]
+            _, top_ind = decoder_out.data.topk(1)
+            curr_tok = Variable(top_ind.squeeze())
         else:
             curr_tok = batch_summ[w]
     return decoder_out, hidden, loss
