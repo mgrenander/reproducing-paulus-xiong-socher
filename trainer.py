@@ -45,8 +45,8 @@ diff_time, curr_time = get_time_diff(curr_time)
 print(", took {} min".format(diff_time))
 
 print("Building vocabulary and creating batches", end='', flush=True)
-article_field.build_vocab(train_set, vectors="glove.6B.100d", max_size=encoder_vocab_size)
-summary_field.build_vocab(train_set, max_size=decoder_vocab_size)
+article_field.build_vocab(train_set, vectors="glove.6B.100d", max_size=encoder_vocab_size, specials=["<sos>", "<pad>"])
+summary_field.build_vocab(train_set, max_size=decoder_vocab_size, specials=["<sos>", "<pad>"])
 
 # train_iter, val_iter = data.BucketIterator.splits((train_set, val_set), batch_size=batch_size, repeat=False,
 #                                                   sort_key=lambda x: len(x.article), device=DEVICE)
@@ -117,15 +117,13 @@ def train(batch, encoder, decoder, enc_opt, dec_opt, loss_fn, teacher_forcing_ra
     enc_opt.zero_grad()
     dec_opt.zero_grad()
     enc_output, enc_hidden = encode_inputs(encoder, batch.article)  # Run article through encoder
-
     # Reshape because we are going from bidirectional to unidirectional LSTM
-    enc_hidden = (enc_hidden[0].view(1, batch_size, 400), enc_hidden[1].view(1, batch_size, 400))
+    enc_hidden = (enc_hidden[0].view(1, batch.batch_size, decoder_hidden_size),
+                  enc_hidden[1].view(1, batch.batch_size, decoder_hidden_size))
     dec_output, dec_hidden, loss = decode_outputs(decoder, enc_hidden, batch.summary, loss_fn, teacher_forcing_ratio)
-
     loss.backward()
     enc_opt.step()
     dec_opt.step()
-
     return loss / batch.summary.size(0)
 
 print("Beginning training")
@@ -135,6 +133,8 @@ for epoch in tqdm_epoch:
     train_iter.init_epoch()
     tqdm_batch = tqdm(train_iter, desc="Batch")
     for b_id, batch in enumerate(tqdm_batch):
-        train(batch, encoder, decoder, encoder_opt, decoder_opt, loss_func, teacher_forcing_ratio)
+        encoder.batch_size = batch.batch_size  # Fixes weird bug where we get batch sizes that are not batch_size
+        decoder.batch_size = batch.batch_size
+        out = train(batch, encoder, decoder, encoder_opt, decoder_opt, loss_func, teacher_forcing_ratio)
 diff_time, curr_time = get_time_diff(curr_time)
 print("Evaluating model")
