@@ -51,7 +51,7 @@ class DecoderLSTM(Module):
         self.hidden = prev_hidden
 
     def forward(self, batch_summ):
-        embeds = self.embedding(batch_summ)
+        embeds = self.embedding(batch_summ).unsqueeze(0)
         out, self.hidden = self.lstm(embeds, self.hidden)
         output = F.log_softmax(self.linear(out.squeeze(0)), dim=1)
         return output
